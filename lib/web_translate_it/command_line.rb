@@ -60,7 +60,7 @@ module WebTranslateIt
             threads << Thread.new(file_array) do |file_array|
               WebTranslateIt::Connection.new(configuration.api_key) do |http|
                 file_array.each do |file|
-                  success = file.fetch(http, command_options.force)
+                  success = file.fetch(http, configuration.logger, command_options.force)
                   complete_success = false if !success
                 end
               end

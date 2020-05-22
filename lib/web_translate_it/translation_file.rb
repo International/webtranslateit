@@ -52,7 +52,8 @@ module WebTranslateIt
             valid = response.code.to_i == 200 && !!YAML.safe_load(response.body)
             File.open(self.file_path, 'wb'){ |file| file << response.body } if valid
             display.push Util.handle_response(response)
-          rescue Timeout::Error
+          rescue Timeout::Error => e
+            logger&.error(e)
             puts StringUtil.failure("Request timeout. Will retry in 5 seconds.")
             if (tries -= 1) > 0
               sleep(5)
@@ -61,9 +62,8 @@ module WebTranslateIt
               success = false
             end
           rescue Psych::SyntaxError => e
-            message = "Could not parse file #{file_path} with id=#{id}"
+            message = "Could not parse file #{file_path} with id=#{id}, skipping because of: #{e.message}"
             display.push StringUtil.failure("Skipped translation: #{message}")
-            logger&.error(e)
             logger&.error(message)
             success = false
           rescue
